@@ -31,7 +31,7 @@ class FilterOperator implements Filter
      *
      * @param string $name
      * @param string|null $column
-     * @return OperatorFilter
+     * @return FilterOperator
      */
     public static function make(string $name, string $column = null): self
     {
@@ -39,7 +39,7 @@ class FilterOperator implements Filter
     }
 
     /**
-     * OperatorFilter constructor.
+     * FilterOperator constructor.
      *
      * @param string $name
      * @param string|null $column
