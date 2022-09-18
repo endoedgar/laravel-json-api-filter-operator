@@ -10,7 +10,7 @@ use LaravelJsonApi\Eloquent\Contracts\Filter;
 use LaravelJsonApi\Eloquent\Filters\Concerns\DeserializesToArray;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class OperatorFilter implements Filter
+class FilterOperator implements Filter
 {
     private $allowedOperators = ['=', '>', '<', '>=', '<=', '<>', 'between', 'in', 'null'];
 
