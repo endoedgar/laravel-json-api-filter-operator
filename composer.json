@@ -1,0 +1,27 @@
+{
+    "name": "endoedgar/laravel-json-api-filter-operator",
+    "description": "This library adds the Operator filter to Laravel JSON API.",
+    "version": "1.0.0",
+    "homepage": "https://github.com/endoedgar/laravel-json-api-filter-operator",
+    "support": {
+        "issues": "https://github.com/endoedgar/laravel-json-api-filter-operator/issues"
+    },
+    "authors": [
+        {
+            "name": "Edgar de Jesus Endo Junior",
+            "email": "endoedgarjunior@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.4|^8.0",
+        "laravel-json-api/laravel": "^2.4",
+        "laravel/framework": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Endoedgar\\LaravelJsonApiOperatorFilter\\": "src/"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
