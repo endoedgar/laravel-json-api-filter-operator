@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Endoedgar\LaravelJsonApiOperatorFilter\Filters;
+namespace Endoedgar\LaravelJsonApiFilterOperator\Filters;
 
 use Illuminate\Database\Eloquent\Builder;
 use LaravelJsonApi\Core\Support\Str;
