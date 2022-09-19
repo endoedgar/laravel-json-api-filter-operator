@@ -76,6 +76,14 @@ class FilterOperator implements Filter
         };
     }
 
+    private function getValueAsArray(?string $value) : array
+    {
+        if(is_null($value))
+            return [];
+
+        return explode(',', $value);
+    }
+
     /**
      * Apply the filter to the query.
      *
@@ -95,10 +103,10 @@ class FilterOperator implements Filter
 
         switch($value['operator']) {
             case 'between':
-                $query->whereBetween($column, explode(',', $value['value']));
+                $query->whereBetween($column, $this->getValueAsArray($value['value']));
                 break;
             case 'in':
-                $query->whereIn($column, explode(',', $value['value']));
+                $query->whereIn($column, $this->getValueAsArray($value['value']));
                 break;
             case 'null':
                 $query->whereNull($column);
