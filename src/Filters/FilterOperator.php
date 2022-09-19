@@ -65,10 +65,10 @@ class FilterOperator implements Filter
         if(!is_array($value))
             throw new BadRequestHttpException('Expecting filter ' . $this->name . ' to be an array.');
 
-        if(!isset($value['operator']))
+        if(!array_key_exists('operator', $value))
             throw new BadRequestHttpException('Expecting filter ' . $this->name . ' to have an operator.');
 
-        if(!isset($value['value']))
+        if(!array_key_exists('value', $value))
             throw new BadRequestHttpException('Expecting filter ' . $this->name . ' to have a value.');
 
         if (!in_array($value['operator'], $this->allowedOperators)) {
