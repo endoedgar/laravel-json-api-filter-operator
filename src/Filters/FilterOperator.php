@@ -12,7 +12,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class FilterOperator implements Filter
 {
-    private $allowedOperators = ['=', '>', '<', '>=', '<=', '<>', 'between', 'in', 'null'];
+    private $allowedOperators = ['=', '>', '<', '>=', '<=', '<>', 'between', 'in', 'null', 'contains'];
 
     use DeserializesToArray;
 
@@ -110,6 +110,9 @@ class FilterOperator implements Filter
                 break;
             case 'null':
                 $query->whereNull($column);
+                break;
+            case 'contains':
+                $query->where($column, 'like', '%' . $value['value'] . '%');
                 break;
             default:
                 $query->where($column, $value['operator'], $value['value']);
