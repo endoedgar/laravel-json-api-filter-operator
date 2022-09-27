@@ -20,11 +20,6 @@ class FilterOperator implements Filter
     /**
      * @var string
      */
-    private string $name;
-
-    /**
-     * @var string
-     */
     private string $column;
 
     /**
@@ -32,11 +27,12 @@ class FilterOperator implements Filter
      *
      * @param string $name
      * @param string|null $column
+     * @param string|null $class
      * @return FilterOperator
      */
-    public static function make(string $name, string $column = null): self
+    public static function make(string $name, string $column = null, ?string $class = null): self
     {
-        return new static($name, $column);
+        return new static($name, $column, $class);
     }
 
     /**
@@ -44,10 +40,10 @@ class FilterOperator implements Filter
      *
      * @param string $name
      * @param string|null $column
+     * @param string|null $model
      */
-    public function __construct(string $name, string $column = null)
+    public function __construct(private string $name, string $column = null, private ?string $class = null)
     {
-        $this->name = $name;
         $this->column = $column ?: Str::underscore($name);
     }
 
@@ -85,7 +81,7 @@ class FilterOperator implements Filter
         return explode(',', $value);
     }
 
-    private function addQueryFilters(Builder $query, string $column, string $operator, mixed $value) : Builder
+    private function addQueryFilters($query, string $column, string $operator, mixed $value)
     {
         switch($operator) {
             case 'between':
@@ -124,8 +120,11 @@ class FilterOperator implements Filter
             case 2:
                 $relationshipName = $relation[0];
                 $relationshipColumn = $relation[1];
+
+                if(empty($this->class))
+                    throw new UnprocessableEntityHttpException("Bad filters - model is required for relationship columns");
                 
-                if (!method_exists($this, $relationshipName))
+                if (!method_exists($this->class, $relationshipName))
                     throw new UnprocessableEntityHttpException("Bad filters - $relationshipName relation does not exist");
 
                 return $query->hasByNonDependentSubquery($relationshipName, function ($query) use ($relationshipName, $relationshipColumn, $value) {
