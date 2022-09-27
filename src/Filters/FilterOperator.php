@@ -9,10 +9,11 @@ use LaravelJsonApi\Core\Support\Str;
 use LaravelJsonApi\Eloquent\Contracts\Filter;
 use LaravelJsonApi\Eloquent\Filters\Concerns\DeserializesToArray;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class FilterOperator implements Filter
 {
-    private $allowedOperators = ['=', '>', '<', '>=', '<=', '<>', 'between', 'in', 'null', 'contains'];
+    private $allowedOperators = ['=', '>', '<', '>=', '<=', '<>', 'between', 'in', 'null', 'not_null', 'contains'];
 
     use DeserializesToArray;
 
@@ -84,11 +85,29 @@ class FilterOperator implements Filter
         return explode(',', $value);
     }
 
+    private function addQueryFilters(Builder $query, string $column, string $operator, mixed $value) : Builder
+    {
+        switch($operator) {
+            case 'between':
+                return $query->whereBetween($column, $this->getValueAsArray($value));
+            case 'in':
+                return $query->whereIn($column, $this->getValueAsArray($value));
+            case 'null':
+                return $query->whereNull($column);
+            case 'not_null':
+                return $query->whereNotNull($column);
+            case 'contains':
+                return $query->where($column, 'like', '%' . $value . '%');
+            default:
+                return $query->where($column, $operator, $value);
+        }
+    }
+
     /**
      * Apply the filter to the query.
      *
      * @param Builder $query
-     * @param mixed $value
+     * @param array $value
      * @return Builder
      */
     public function apply($query, $value)
@@ -98,25 +117,22 @@ class FilterOperator implements Filter
         $column = $this->column;
 
         $relation = explode('.', $column);
-        if (count($relation) !== 1)
-            throw new BadRequestHttpException('Operator Filter for ' . $this->name . ' doesn\'t support relationships yet.');
 
-        switch($value['operator']) {
-            case 'between':
-                $query->whereBetween($column, $this->getValueAsArray($value['value']));
-                break;
-            case 'in':
-                $query->whereIn($column, $this->getValueAsArray($value['value']));
-                break;
-            case 'null':
-                $query->whereNull($column);
-                break;
-            case 'contains':
-                $query->where($column, 'like', '%' . $value['value'] . '%');
-                break;
+        switch(count($relation)) {
+            case 1:
+                return $this->addQueryFilters($query, $column, $value['value'], $value['value']);
+            case 2:
+                $relationshipName = $relation[0];
+                $relationshipColumn = $relation[1];
+                
+                if (!method_exists($this, $relationshipName))
+                    throw new UnprocessableEntityHttpException("Bad filters - $relationshipName relation does not exist");
+
+                return $query->hasByNonDependentSubquery($relationshipName, function ($query) use ($relationshipName, $relationshipColumn, $value) {
+                    $this->addQueryFilters($query, $relationshipName.'.'.$relationshipColumn, $value['operator'], $value['value']);
+                });
             default:
-                $query->where($column, $value['operator'], $value['value']);
-                break;
+                throw new BadRequestHttpException('Operator Filter for ' . $this->name . ' doesn\'t support relationships of relationships yet.');
         }
     }
 
