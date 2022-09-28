@@ -116,7 +116,7 @@ class FilterOperator implements Filter
 
         switch(count($relation)) {
             case 1:
-                return $this->addQueryFilters($query, $column, $value['value'], $value['value']);
+                return $this->addQueryFilters($query, $column, $value['operator'], $value['value']);
             case 2:
                 $relationshipName = $relation[0];
                 $relationshipColumn = $relation[1];
