@@ -99,6 +99,19 @@ class FilterOperator implements Filter
         }
     }
 
+    private function getRelationshipTableName($class, $relationshipName)
+    {
+        if(empty($this->class))
+            throw new UnprocessableEntityHttpException("Bad filters - model is required for relationship columns");
+        
+        if (!method_exists($this->class, $relationshipName))
+            throw new UnprocessableEntityHttpException("Bad filters - $relationshipName relation does not exist");
+
+        $class = new $class;
+
+        return $class->$relationshipName()->getRelated()->getTable();
+    }
+
     /**
      * Apply the filter to the query.
      *
@@ -121,15 +134,12 @@ class FilterOperator implements Filter
                 $relationshipName = $relation[0];
                 $relationshipColumn = $relation[1];
 
-                if(empty($this->class))
-                    throw new UnprocessableEntityHttpException("Bad filters - model is required for relationship columns");
-                
-                if (!method_exists($this->class, $relationshipName))
-                    throw new UnprocessableEntityHttpException("Bad filters - $relationshipName relation does not exist");
+                $relationshipTableName = $this->getRelationshipTableName($this->class, $relationshipName);
 
-                return $query->hasByNonDependentSubquery($relationshipName, function ($query) use ($relationshipName, $relationshipColumn, $value) {
-                    $this->addQueryFilters($query, $relationshipName.'.'.$relationshipColumn, $value['operator'], $value['value']);
+                $query = $query->hasByNonDependentSubquery($relationshipName, function ($query) use ($relationshipTableName, $relationshipColumn, $value) {
+                    $this->addQueryFilters($query, $relationshipTableName.'.'.$relationshipColumn, $value['operator'], $value['value']);
                 });
+                return $query;
             default:
                 throw new BadRequestHttpException('Operator Filter for ' . $this->name . ' doesn\'t support relationships of relationships yet.');
         }

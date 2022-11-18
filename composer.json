@@ -1,7 +1,7 @@
 {
     "name": "endoedgar/laravel-json-api-filter-operator",
     "description": "This library adds the Operator filter to Laravel JSON API.",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "homepage": "https://github.com/endoedgar/laravel-json-api-filter-operator",
     "support": {
         "issues": "https://github.com/endoedgar/laravel-json-api-filter-operator/issues"
